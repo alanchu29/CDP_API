@@ -15,8 +15,15 @@ st.set_page_config(
 if "last_result_json" not in st.session_state:
     st.session_state["last_result_json"] = None
 
+if "sn_text_input" not in st.session_state:
+    st.session_state["sn_text_input"] = "M1304365003B53823450076"
+
 # API endpoint (single source of truth for UI + request call)
 API_URL = "https://apim.wiwynn.com/nifi/prd/api/cerberus/v1/sn_info"
+
+def reset_input_and_response():
+    st.session_state["sn_text_input"] = ""
+    st.session_state["last_result_json"] = None
 
 # --- CSS styling ---
 st.markdown("""
@@ -135,7 +142,13 @@ with st.sidebar:
     st.subheader("⚙️ Settings")
     
     site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN']
-    site = st.selectbox("SITE", options=site_options, index=2)
+    site = st.selectbox(
+        "SITE",
+        options=site_options,
+        index=2,
+        key="site_select",
+        on_change=reset_input_and_response
+    )
     
     type_map = {
         "overlake (Celestial Peak, Glacier Peak)": "overlake",
@@ -144,7 +157,13 @@ with st.sidebar:
         "SoC": "SoC",
         "CaP": "CaP"
     }
-    type_label = st.selectbox("TYPE", options=list(type_map.keys()), index=2)
+    type_label = st.selectbox(
+        "TYPE",
+        options=list(type_map.keys()),
+        index=2,
+        key="type_select",
+        on_change=reset_input_and_response
+    )
     selected_type = type_map[type_label]
     
     st.divider()
@@ -158,9 +177,9 @@ with st.sidebar:
 st.markdown("### 📋 Enter Serial Number (SN)")
 sn_text = st.text_area(
     "Enter SN (one per line)", 
-    value="M1304365003B53823450076", 
     height=95,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
+    key="sn_text_input"
 )
 
 # Send button
