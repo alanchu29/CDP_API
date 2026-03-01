@@ -15,6 +15,9 @@ st.set_page_config(
 if "last_result_json" not in st.session_state:
     st.session_state["last_result_json"] = None
 
+# API endpoint (single source of truth for UI + request call)
+API_URL = "https://apim.wiwynn.com/nifi/prd/api/cerberus/v1/sn_info"
+
 # --- CSS styling ---
 st.markdown("""
     <style>
@@ -69,6 +72,11 @@ st.markdown("""
         background-color: #30363d;
         border-color: #8b949e;
         color: #ffffff;
+    }
+    .stButton>button[kind="primary"] {
+        font-size: 1.15rem;
+        font-weight: 700;
+        padding: 0.9rem 1rem;
     }
 
     /* Sidebar dark mode */
@@ -143,30 +151,39 @@ with st.sidebar:
     st.markdown("### 🛰️ System Status")
     st.success("API Gateway: Online")
     st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d')}")
+    st.caption("Current API endpoint")
+    st.code(API_URL, language=None)
 
 # --- Main input area ---
 st.markdown("### 📋 Enter Serial Number (SN)")
 sn_text = st.text_area(
     "Enter SN (one per line)", 
     value="M1304365003B53823450076", 
-    height=200,
+    height=95,
     label_visibility="collapsed"
 )
 
 # Send button
-if st.button("🚀 Send Request"):
+send_col_left, send_col_mid, send_col_right = st.columns([1, 2, 1])
+with send_col_mid:
+    send_clicked = st.button(
+        "🚀 Send Request",
+        key="send_request_button",
+        type="primary",
+        use_container_width=True
+    )
+if send_clicked:
     sn_list = [s.strip() for s in sn_text.replace(',', '\n').split('\n') if s.strip()]
     
     if not sn_list:
         st.warning("⚠️ Please enter at least one serial number.")
     else:
-        url = "https://apim.wiwynn.com/nifi/prd/api/cerberus/v1/sn_info"
         payload = {"SITE": site, "TYPE": selected_type, "SN": sn_list}
         headers = {'Content-Type': 'application/json'}
 
         with st.spinner('Connecting...'):
             try:
-                response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
+                response = requests.post(API_URL, headers=headers, data=json.dumps(payload), timeout=15)
                 
                 if response.status_code == 200:
                     result_json = response.json()
