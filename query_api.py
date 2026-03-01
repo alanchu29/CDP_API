@@ -11,6 +11,10 @@ st.set_page_config(
     layout="centered"
 )
 
+# Persist latest successful response across reruns.
+if "last_result_json" not in st.session_state:
+    st.session_state["last_result_json"] = None
+
 # --- CSS styling ---
 st.markdown("""
     <style>
@@ -143,33 +147,35 @@ if st.button("🚀 Send Request"):
                 response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
                 
                 if response.status_code == 200:
-                    st.success(f"✅ Query succeeded. Found {len(response.json())} record(s).")
-                    
-                    # Show response
                     result_json = response.json()
-                    result_json_text = json.dumps(result_json, indent=4)
-                    response_title_col, response_action_col = st.columns([5, 2])
-                    with response_title_col:
-                        st.markdown("### 📦 Response")
-                    with response_action_col:
-                        copy_clicked = st.button("📋 Copy JSON", key="copy_json_button")
-                    if copy_clicked:
-                        components.html(
-                            f"""
-                            <script>
-                            const jsonText = {json.dumps(result_json_text)};
-                            navigator.clipboard.writeText(jsonText);
-                            </script>
-                            """,
-                            height=0,
-                        )
-                        st.toast("JSON copied to clipboard.", icon="✅")
-                    st.json(result_json)
+                    st.session_state["last_result_json"] = result_json
+                    st.success(f"✅ Query succeeded. Found {len(result_json)} record(s).")
                 else:
                     st.error(f"❌ Request failed (Status code: {response.status_code})")
                     st.code(response.text)
             except Exception as e:
                 st.error(f"⚠️ Connection error: {str(e)}")
+
+if st.session_state["last_result_json"] is not None:
+    result_json = st.session_state["last_result_json"]
+    result_json_text = json.dumps(result_json, indent=4)
+    response_title_col, response_action_col = st.columns([5, 2])
+    with response_title_col:
+        st.markdown("### 📦 Response")
+    with response_action_col:
+        copy_clicked = st.button("📋 Copy JSON", key="copy_json_button")
+    if copy_clicked:
+        components.html(
+            f"""
+            <script>
+            const jsonText = {json.dumps(result_json_text)};
+            navigator.clipboard.writeText(jsonText);
+            </script>
+            """,
+            height=0,
+        )
+        st.toast("JSON copied to clipboard.", icon="✅")
+    st.json(result_json)
 
 # Footer
 st.divider()
