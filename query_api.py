@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import json
 from datetime import datetime
@@ -148,16 +149,24 @@ if st.button("🚀 Send Request"):
                     
                     # Show response
                     result_json = response.json()
-                    st.markdown("### 📦 Response")
+                    result_json_text = json.dumps(result_json, indent=4)
+                    response_title_col, response_action_col = st.columns([5, 2])
+                    with response_title_col:
+                        st.markdown("### 📦 Response")
+                    with response_action_col:
+                        copy_clicked = st.button("📋 Copy JSON", key="copy_json_button")
+                    if copy_clicked:
+                        components.html(
+                            f"""
+                            <script>
+                            const jsonText = {json.dumps(result_json_text)};
+                            navigator.clipboard.writeText(jsonText);
+                            </script>
+                            """,
+                            height=0,
+                        )
+                        st.toast("JSON copied to clipboard.", icon="✅")
                     st.json(result_json)
-                    
-                    # Download result
-                    st.download_button(
-                        label="📥 Download JSON Result",
-                        data=json.dumps(result_json, indent=4),
-                        file_name=f"Query_{site}_{datetime.now().strftime('%H%M%S')}.json",
-                        mime="application/json"
-                    )
                 else:
                     st.error(f"❌ Request failed (Status code: {response.status_code})")
                     st.code(response.text)
