@@ -202,26 +202,25 @@ with send_col_mid:
     )
 if send_clicked:
     sn_list = [s.strip() for s in sn_text.replace(',', '\n').split('\n') if s.strip()]
-    
-    if not sn_list:
-        st.warning("⚠️ Please enter at least one serial number.")
-    else:
-        payload = {"SITE": site, "TYPE": selected_type, "SN": sn_list}
-        headers = {'Content-Type': 'application/json'}
+    payload = {"SITE": site, "TYPE": selected_type}
+    if sn_list:
+        payload["SN"] = sn_list
 
-        with st.spinner('Connecting...'):
-            try:
-                response = requests.post(API_URL, headers=headers, data=json.dumps(payload), timeout=15)
-                
-                if response.status_code == 200:
-                    result_json = response.json()
-                    st.session_state["last_result_json"] = result_json
-                    st.success(f"✅ Query succeeded. Found {len(result_json)} record(s).")
-                else:
-                    st.error(f"❌ Request failed (Status code: {response.status_code})")
-                    st.code(response.text)
-            except Exception as e:
-                st.error(f"⚠️ Connection error: {str(e)}")
+    headers = {'Content-Type': 'application/json'}
+
+    with st.spinner('Connecting...'):
+        try:
+            response = requests.post(API_URL, headers=headers, data=json.dumps(payload), timeout=15)
+            
+            if response.status_code == 200:
+                result_json = response.json()
+                st.session_state["last_result_json"] = result_json
+                st.success(f"✅ Query succeeded. Found {len(result_json)} record(s).")
+            else:
+                st.error(f"❌ Request failed (Status code: {response.status_code})")
+                st.code(response.text)
+        except Exception as e:
+            st.error(f"⚠️ Connection error: {str(e)}")
 
 if st.session_state["last_result_json"] is not None:
     result_json = st.session_state["last_result_json"]
