@@ -140,15 +140,6 @@ st.markdown("<p style='text-align: center; color: #8b949e;'>Enter serial numbers
 # --- Sidebar settings ---
 with st.sidebar:
     st.subheader("⚙️ Settings")
-
-    api_environment = st.radio(
-        "ENV",
-        options=["PRD", "DEV"],
-        horizontal=True,
-        key="api_env_select",
-        on_change=reset_input_and_response
-    )
-    API_URL = API_URL_TEMPLATE.format(env=api_environment.lower())
     
     site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN']
     site = st.selectbox(
@@ -177,6 +168,14 @@ with st.sidebar:
     
     st.divider()
     st.markdown("### 🛰️ System Status")
+    api_environment = st.radio(
+        "ENV",
+        options=["PRD", "DEV"],
+        horizontal=True,
+        key="api_env_select",
+        on_change=reset_input_and_response
+    )
+    API_URL = API_URL_TEMPLATE.format(env=api_environment.lower())
     st.success("API Gateway: Online")
     st.caption(f"Current environment: {api_environment}")
     st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d')}")
