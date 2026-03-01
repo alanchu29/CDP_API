@@ -73,7 +73,7 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label p,
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label span {
-        font-size: 1.1rem !important;
+        font-size: 1.35rem !important;
         font-weight: 700 !important;
     }
     
@@ -98,12 +98,10 @@ st.markdown("<p style='text-align: center; color: #8b949e;'>Enter serial numbers
 
 # --- Sidebar settings ---
 with st.sidebar:
-    st.image("https://www.wiwynn.com/wp-content/uploads/2022/03/wiwynn_logo.png", width=150)
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader("⚙️ 設定")
+    st.subheader("⚙️ Settings")
     
     site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN']
-    site = st.selectbox("Select SITE", options=site_options, index=2)
+    site = st.selectbox("SITE", options=site_options, index=2)
     
     type_map = {
         "overlake (Celestial Peak, Glacier Peak)": "overlake",
@@ -112,7 +110,7 @@ with st.sidebar:
         "SoC": "SoC",
         "CaP": "CaP"
     }
-    type_label = st.selectbox("Select TYPE", options=list(type_map.keys()), index=2)
+    type_label = st.selectbox("TYPE", options=list(type_map.keys()), index=2)
     selected_type = type_map[type_label]
     
     st.divider()
