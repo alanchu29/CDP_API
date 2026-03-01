@@ -18,8 +18,8 @@ if "last_result_json" not in st.session_state:
 if "sn_text_input" not in st.session_state:
     st.session_state["sn_text_input"] = "M1304365003B53823450076"
 
-# API endpoint (single source of truth for UI + request call)
-API_URL = "https://apim.wiwynn.com/nifi/prd/api/cerberus/v1/sn_info"
+# API endpoint template (single source of truth for UI + request call)
+API_URL_TEMPLATE = "https://apim.wiwynn.com/nifi/{env}/api/cerberus/v1/sn_info"
 
 def reset_input_and_response():
     st.session_state["sn_text_input"] = ""
@@ -140,6 +140,15 @@ st.markdown("<p style='text-align: center; color: #8b949e;'>Enter serial numbers
 # --- Sidebar settings ---
 with st.sidebar:
     st.subheader("⚙️ Settings")
+
+    api_environment = st.radio(
+        "ENV",
+        options=["PRD", "DEV"],
+        horizontal=True,
+        key="api_env_select",
+        on_change=reset_input_and_response
+    )
+    API_URL = API_URL_TEMPLATE.format(env=api_environment.lower())
     
     site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN']
     site = st.selectbox(
@@ -169,6 +178,7 @@ with st.sidebar:
     st.divider()
     st.markdown("### 🛰️ System Status")
     st.success("API Gateway: Online")
+    st.caption(f"Current environment: {api_environment}")
     st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d')}")
     st.caption("Current API endpoint")
     st.code(API_URL, language=None)
