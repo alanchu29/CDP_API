@@ -227,14 +227,54 @@ if st.session_state["last_result_json"] is not None:
             f"""
             <script>
             const jsonText = {json.dumps(result_json_text)};
-            navigator.clipboard.writeText(jsonText);
+
+            function showCenterNotice(message, isSuccess) {{
+              const oldNotice = document.getElementById("copy-json-status-notice");
+              if (oldNotice) oldNotice.remove();
+
+              const notice = document.createElement("div");
+              notice.id = "copy-json-status-notice";
+              notice.textContent = message;
+              notice.style.position = "fixed";
+              notice.style.top = "50%";
+              notice.style.left = "50%";
+              notice.style.transform = "translate(-50%, -50%)";
+              notice.style.backgroundColor = isSuccess ? "rgba(22, 101, 52, 0.95)" : "rgba(127, 29, 29, 0.95)";
+              notice.style.color = "#ffffff";
+              notice.style.border = isSuccess ? "1px solid #22c55e" : "1px solid #ef4444";
+              notice.style.borderRadius = "8px";
+              notice.style.padding = "0.8rem 1.2rem";
+              notice.style.fontWeight = "700";
+              notice.style.fontSize = "1.2rem";
+              notice.style.zIndex = "9999";
+              notice.style.boxShadow = "0 8px 24px rgba(1, 4, 9, 0.6)";
+              notice.style.opacity = "0";
+              notice.style.transition = "opacity 120ms ease";
+
+              document.body.appendChild(notice);
+              requestAnimationFrame(() => {{ notice.style.opacity = "1"; }});
+
+              setTimeout(() => {{
+                notice.style.opacity = "0";
+                setTimeout(() => notice.remove(), 180);
+              }}, 1800);
+            }}
+
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {{
+              showCenterNotice("❌ Clipboard API is not available in this browser.", false);
+            }} else {{
+              navigator.clipboard.writeText(jsonText)
+                .then(() => {{
+                  showCenterNotice("✅ JSON copied to clipboard.", true);
+                }})
+                .catch((err) => {{
+                  const detail = err && err.message ? `: ${{err.message}}` : "";
+                  showCenterNotice(`❌ Copy failed${{detail}}`, false);
+                }});
+            }}
             </script>
             """,
             height=0,
-        )
-        st.markdown(
-            "<div class='copy-notice-center'>✅ JSON copied to clipboard.</div>",
-            unsafe_allow_html=True
         )
     st.json(result_json)
 
