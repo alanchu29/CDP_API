@@ -85,6 +85,28 @@ st.markdown("""
     .block-container {
         padding-top: 3rem !important;
     }
+    .copy-notice-center {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(33, 38, 45, 0.95);
+        color: #ffffff;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 0.8rem 1.2rem;
+        z-index: 9999;
+        font-weight: 600;
+        font-size: 1.2rem;
+        box-shadow: 0 8px 24px rgba(1, 4, 9, 0.6);
+        animation: fadeOutCenterNotice 1.8s ease forwards;
+    }
+    @keyframes fadeOutCenterNotice {
+        0% { opacity: 0; }
+        10% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -174,7 +196,10 @@ if st.session_state["last_result_json"] is not None:
             """,
             height=0,
         )
-        st.toast("JSON copied to clipboard.", icon="✅")
+        st.markdown(
+            "<div class='copy-notice-center'>✅ JSON copied to clipboard.</div>",
+            unsafe_allow_html=True
+        )
     st.json(result_json)
 
 # Footer
