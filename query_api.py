@@ -3,23 +3,23 @@ import requests
 import json
 from datetime import datetime
 
-# 設定頁面資訊
+# Page configuration
 st.set_page_config(
     page_title="Wiwynn CDP Cerberus API Query System", 
-    page_icon="🛡️",
+    page_icon="💻",
     layout="centered"
 )
 
-# --- 參考原始風格的 CSS 注入 ---
+# --- CSS styling ---
 st.markdown("""
     <style>
-    /* 全域背景設為深色 */
+    /* Global dark theme */
     .stApp {
         background-color: #0e1117;
         color: #ffffff;
     }
     
-    /* 修正輸入框顏色：深底白字 */
+    /* Text area styling: dark background with light text */
     div[data-baseweb="textarea"] textarea {
         color: #ffffff !important;
         background-color: #1e2128 !important;
@@ -27,29 +27,30 @@ st.markdown("""
         font-family: 'Source Code Pro', monospace !important;
     }
 
-    /* 標題區域樣式 */
+    /* Header area */
     .main-header {
-        text-align: center;
+        display: flex;
+        justify-content: center;
         padding-top: 2rem;
         padding-bottom: 1rem;
+    }
+    .header-content {
+        display: inline-block;
     }
     .title-text {
         font-size: 2.2rem;
         font-weight: 700;
         color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
     }
     .dev-tag {
         font-size: 1.1rem;
         color: #58a6ff;
         font-weight: 600;
         margin-top: 0.5rem;
+        text-align: left;
     }
 
-    /* 按鈕樣式：深色簡約 */
+    /* Button style */
     .stButton>button {
         width: 100%;
         background-color: #21262d;
@@ -65,36 +66,43 @@ st.markdown("""
         color: #ffffff;
     }
 
-    /* 側邊欄深色優化 */
+    /* Sidebar dark mode */
     section[data-testid="stSidebar"] {
         background-color: #010409 !important;
     }
+    section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label p,
+    section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label span {
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+    }
     
-    /* 移除不必要的間距 */
+    /* Remove extra top spacing */
     .block-container {
         padding-top: 3rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 標題與署名 ---
+# --- Title and signature ---
 st.markdown(f"""
     <div class="main-header">
-        <div class="title-text">🛡️ Wiwynn CDP Cerberus API Query System</div>
-        <div class="dev-tag">@Dixon Chu</div>
+        <div class="header-content">
+            <div class="title-text">Wiwynn CDP Cerberus API Query System</div>
+            <div class="dev-tag">@Dixon Chu</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; color: #8b949e;'>請輸入序號以進行查詢。本系統直接存取 Wiwynn API Gateway。</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #8b949e;'>Enter serial numbers to run queries. This tool connects directly to the Wiwynn API Gateway.</p>", unsafe_allow_html=True)
 
-# --- Sidebar 設定區 ---
+# --- Sidebar settings ---
 with st.sidebar:
     st.image("https://www.wiwynn.com/wp-content/uploads/2022/03/wiwynn_logo.png", width=150)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader("⚙️ 請求設定")
+    st.subheader("⚙️ 設定")
     
     site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN']
-    site = st.selectbox("選擇 SITE", options=site_options, index=2)
+    site = st.selectbox("Select SITE", options=site_options, index=2)
     
     type_map = {
         "overlake (Celestial Peak, Glacier Peak)": "overlake",
@@ -103,58 +111,58 @@ with st.sidebar:
         "SoC": "SoC",
         "CaP": "CaP"
     }
-    type_label = st.selectbox("選擇 TYPE", options=list(type_map.keys()), index=2)
+    type_label = st.selectbox("Select TYPE", options=list(type_map.keys()), index=2)
     selected_type = type_map[type_label]
     
     st.divider()
-    st.markdown("### 🛰️ 系統狀態")
+    st.markdown("### 🛰️ System Status")
     st.success("API Gateway: Online")
-    st.caption(f"最後更新: {datetime.now().strftime('%Y-%m-%d')}")
+    st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d')}")
 
-# --- 主輸入區 ---
-st.markdown("### 📋 輸入序號 (SN)")
+# --- Main input area ---
+st.markdown("### 📋 Enter Serial Number (SN)")
 sn_text = st.text_area(
-    "請輸入 SN (每行一個)", 
+    "Enter SN (one per line)", 
     value="M1304365003B53823450076", 
     height=200,
     label_visibility="collapsed"
 )
 
-# 發送按鈕
-if st.button("🚀 發送請求 (Send Request)"):
+# Send button
+if st.button("🚀 Send Request"):
     sn_list = [s.strip() for s in sn_text.replace(',', '\n').split('\n') if s.strip()]
     
     if not sn_list:
-        st.warning("⚠️ 請輸入至少一個序號。")
+        st.warning("⚠️ Please enter at least one serial number.")
     else:
         url = "https://apim.wiwynn.com/nifi/prd/api/cerberus/v1/sn_info"
         payload = {"SITE": site, "TYPE": selected_type, "SN": sn_list}
         headers = {'Content-Type': 'application/json'}
 
-        with st.spinner('連線中...'):
+        with st.spinner('Connecting...'):
             try:
                 response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=15)
                 
                 if response.status_code == 200:
-                    st.success(f"✅ 查詢成功！共找到 {len(response.json())} 筆資料。")
+                    st.success(f"✅ Query succeeded. Found {len(response.json())} record(s).")
                     
-                    # 顯示結果
+                    # Show response
                     result_json = response.json()
-                    st.markdown("### 📦 回傳結果")
+                    st.markdown("### 📦 Response")
                     st.json(result_json)
                     
-                    # 下載
+                    # Download result
                     st.download_button(
-                        label="📥 下載 JSON 結果",
+                        label="📥 Download JSON Result",
                         data=json.dumps(result_json, indent=4),
                         file_name=f"Query_{site}_{datetime.now().strftime('%H%M%S')}.json",
                         mime="application/json"
                     )
                 else:
-                    st.error(f"❌ 請求失敗 (狀態碼: {response.status_code})")
+                    st.error(f"❌ Request failed (Status code: {response.status_code})")
                     st.code(response.text)
             except Exception as e:
-                st.error(f"⚠️ 發生連線錯誤: {str(e)}")
+                st.error(f"⚠️ Connection error: {str(e)}")
 
 # Footer
 st.divider()
