@@ -221,60 +221,106 @@ if st.session_state["last_result_json"] is not None:
     with response_title_col:
         st.markdown("### 📦 Response")
     with response_action_col:
-        copy_clicked = st.button("📋 Copy JSON", key="copy_json_button")
-    if copy_clicked:
         components.html(
             f"""
+            <div style="display:flex;justify-content:flex-end;align-items:center;height:44px;">
+              <button id="copyJsonBtn" style="
+                width: 100%;
+                background-color: #21262d;
+                color: #ffffff;
+                border: 1px solid #30363d;
+                border-radius: 6px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                padding: 0.55rem 0.7rem;
+                cursor: pointer;
+              ">📋 Copy JSON</button>
+            </div>
             <script>
             const jsonText = {json.dumps(result_json_text)};
+            const copyBtn = document.getElementById("copyJsonBtn");
 
-            function showCenterNotice(message, isSuccess) {{
-              const oldNotice = document.getElementById("copy-json-status-notice");
-              if (oldNotice) oldNotice.remove();
+            function showCenterNoticeInParent(message, isSuccess) {{
+              try {{
+                const parentDoc = window.parent && window.parent.document ? window.parent.document : document;
+                const oldNotice = parentDoc.getElementById("copy-json-status-notice");
+                if (oldNotice) oldNotice.remove();
 
-              const notice = document.createElement("div");
-              notice.id = "copy-json-status-notice";
-              notice.textContent = message;
-              notice.style.position = "fixed";
-              notice.style.top = "50%";
-              notice.style.left = "50%";
-              notice.style.transform = "translate(-50%, -50%)";
-              notice.style.backgroundColor = isSuccess ? "rgba(22, 101, 52, 0.95)" : "rgba(127, 29, 29, 0.95)";
-              notice.style.color = "#ffffff";
-              notice.style.border = isSuccess ? "1px solid #22c55e" : "1px solid #ef4444";
-              notice.style.borderRadius = "8px";
-              notice.style.padding = "0.8rem 1.2rem";
-              notice.style.fontWeight = "700";
-              notice.style.fontSize = "1.2rem";
-              notice.style.zIndex = "9999";
-              notice.style.boxShadow = "0 8px 24px rgba(1, 4, 9, 0.6)";
-              notice.style.opacity = "0";
-              notice.style.transition = "opacity 120ms ease";
-
-              document.body.appendChild(notice);
-              requestAnimationFrame(() => {{ notice.style.opacity = "1"; }});
-
-              setTimeout(() => {{
+                const notice = parentDoc.createElement("div");
+                notice.id = "copy-json-status-notice";
+                notice.textContent = message;
+                notice.style.position = "fixed";
+                notice.style.top = "50%";
+                notice.style.left = "50%";
+                notice.style.transform = "translate(-50%, -50%)";
+                notice.style.backgroundColor = isSuccess ? "rgba(22, 101, 52, 0.95)" : "rgba(127, 29, 29, 0.95)";
+                notice.style.color = "#ffffff";
+                notice.style.border = isSuccess ? "1px solid #22c55e" : "1px solid #ef4444";
+                notice.style.borderRadius = "8px";
+                notice.style.padding = "0.8rem 1.2rem";
+                notice.style.fontWeight = "700";
+                notice.style.fontSize = "1.2rem";
+                notice.style.zIndex = "9999";
+                notice.style.boxShadow = "0 8px 24px rgba(1, 4, 9, 0.6)";
                 notice.style.opacity = "0";
-                setTimeout(() => notice.remove(), 180);
-              }}, 1800);
+                notice.style.transition = "opacity 120ms ease";
+
+                parentDoc.body.appendChild(notice);
+                requestAnimationFrame(() => {{ notice.style.opacity = "1"; }});
+
+                setTimeout(() => {{
+                  notice.style.opacity = "0";
+                  setTimeout(() => notice.remove(), 180);
+                }}, 1800);
+              }} catch (e) {{
+                console.error("Unable to show copy status notice:", e);
+              }}
             }}
 
-            if (!navigator.clipboard || !navigator.clipboard.writeText) {{
-              showCenterNotice("❌ Clipboard API is not available in this browser.", false);
-            }} else {{
-              navigator.clipboard.writeText(jsonText)
-                .then(() => {{
-                  showCenterNotice("✅ JSON copied to clipboard.", true);
-                }})
-                .catch((err) => {{
-                  const detail = err && err.message ? `: ${{err.message}}` : "";
-                  showCenterNotice(`❌ Copy failed${{detail}}`, false);
-                }});
+            async function copyJsonToClipboard() {{
+              let copied = false;
+              let errDetail = "";
+
+              if (navigator.clipboard && navigator.clipboard.writeText) {{
+                try {{
+                  await navigator.clipboard.writeText(jsonText);
+                  copied = true;
+                }} catch (err) {{
+                  errDetail = err && err.message ? err.message : String(err);
+                }}
+              }}
+
+              if (!copied) {{
+                try {{
+                  const ta = document.createElement("textarea");
+                  ta.value = jsonText;
+                  ta.setAttribute("readonly", "");
+                  ta.style.position = "fixed";
+                  ta.style.left = "-9999px";
+                  document.body.appendChild(ta);
+                  ta.focus();
+                  ta.select();
+                  copied = document.execCommand("copy");
+                  document.body.removeChild(ta);
+                }} catch (err) {{
+                  if (!errDetail) {{
+                    errDetail = err && err.message ? err.message : String(err);
+                  }}
+                }}
+              }}
+
+              if (copied) {{
+                showCenterNoticeInParent("✅ JSON copied to clipboard.", true);
+              }} else {{
+                const suffix = errDetail ? `: ${{errDetail}}` : "";
+                showCenterNoticeInParent(`❌ Copy failed${{suffix}}`, false);
+              }}
             }}
+
+            copyBtn.addEventListener("click", copyJsonToClipboard);
             </script>
             """,
-            height=0,
+            height=48,
         )
     st.json(result_json)
 
