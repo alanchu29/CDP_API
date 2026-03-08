@@ -71,6 +71,22 @@ st.markdown("""
         border: 1.5px solid #2e466c !important;
         opacity: 1 !important;
     }
+    div[data-testid="stJson"] {
+        border: 1.5px solid #2e466c !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+    }
+    div[data-testid="stJson"] .react-json-view,
+    div[data-testid="stJson"] .react-json-view > div,
+    div[data-testid="stJson"] [role="tree"] {
+        background-color: #0f1726 !important;
+    }
+    div[data-testid="stJson"] *,
+    div[data-testid="stJson"] span,
+    div[data-testid="stJson"] p {
+        color: #eaf3ff !important;
+        opacity: 1 !important;
+    }
 
     /* Header area */
     .main-header {
@@ -473,14 +489,7 @@ if st.session_state["last_result_json"] is not None:
             """,
             height=48,
         )
-    st.text_area(
-        "JSON Response",
-        value=result_json_text,
-        height=620,
-        key="json_response_display",
-        label_visibility="collapsed",
-        disabled=True
-    )
+    st.json(result_json, expanded=1)
 
 # Footer
 st.divider()
