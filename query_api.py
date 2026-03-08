@@ -2,7 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import requests
 import json
-import html
 from datetime import datetime
 
 # Page configuration
@@ -64,6 +63,13 @@ st.markdown("""
     div[data-baseweb="textarea"] textarea:focus {
         border-color: var(--accent) !important;
         box-shadow: 0 0 0 2px rgba(78, 161, 255, 0.25) !important;
+    }
+    div[data-baseweb="textarea"] textarea[disabled] {
+        color: #eaf3ff !important;
+        -webkit-text-fill-color: #eaf3ff !important;
+        background-color: #0f1726 !important;
+        border: 1.5px solid #2e466c !important;
+        opacity: 1 !important;
     }
 
     /* Header area */
@@ -249,20 +255,6 @@ st.markdown("""
     div[data-testid="stCodeBlock"] pre code {
         color: #eaf3ff !important;
     }
-    .json-response-box {
-        margin: 0;
-        padding: 1rem 1.1rem;
-        border: 1.5px solid #2e466c;
-        border-radius: 10px;
-        background-color: #0f1726;
-        color: #eaf3ff;
-        font-family: "Source Code Pro", "Consolas", monospace;
-        font-size: 0.97rem;
-        line-height: 1.45;
-        white-space: pre;
-        overflow: auto;
-        max-height: 62vh;
-    }
     @keyframes fadeOutCenterNotice {
         0% { opacity: 0; }
         10% { opacity: 1; }
@@ -375,7 +367,6 @@ if send_clicked:
 if st.session_state["last_result_json"] is not None:
     result_json = st.session_state["last_result_json"]
     result_json_text = json.dumps(result_json, indent=4)
-    escaped_result_json = html.escape(result_json_text)
     response_title_col, response_action_col = st.columns([5, 2])
     with response_title_col:
         st.markdown("### 📦 Response")
@@ -482,26 +473,13 @@ if st.session_state["last_result_json"] is not None:
             """,
             height=48,
         )
-    st.markdown(
-        f"""
-        <pre style="
-            margin: 0;
-            padding: 1rem 1.1rem;
-            border: 1.5px solid #2e466c;
-            border-radius: 10px;
-            background-color: #0f1726;
-            color: #eaf3ff;
-            font-family: 'Source Code Pro', Consolas, monospace;
-            font-size: 0.97rem;
-            line-height: 1.45;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            tab-size: 4;
-            overflow: auto;
-            max-height: 62vh;
-        ">{escaped_result_json}</pre>
-        """,
-        unsafe_allow_html=True
+    st.text_area(
+        "JSON Response",
+        value=result_json_text,
+        height=620,
+        key="json_response_display",
+        label_visibility="collapsed",
+        disabled=True
     )
 
 # Footer
