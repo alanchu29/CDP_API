@@ -28,18 +28,35 @@ def reset_input_and_response():
 # --- CSS styling ---
 st.markdown("""
     <style>
+    :root {
+        --bg-main: #0b1220;
+        --bg-panel: #111a2b;
+        --bg-input: #0f1726;
+        --text-main: #e6edf7;
+        --text-muted: #9fb3c8;
+        --accent: #4ea1ff;
+        --accent-strong: #2f81f7;
+        --border: #2b3f5f;
+    }
+
     /* Global dark theme */
     .stApp {
-        background-color: #0e1117;
-        color: #ffffff;
+        background: radial-gradient(circle at 15% 0%, #1a2740 0%, var(--bg-main) 45%);
+        color: var(--text-main);
     }
     
     /* Text area styling: dark background with light text */
     div[data-baseweb="textarea"] textarea {
-        color: #ffffff !important;
-        background-color: #1e2128 !important;
-        border: 1px solid #30363d !important;
+        color: var(--text-main) !important;
+        background-color: var(--bg-input) !important;
+        border: 1.5px solid var(--border) !important;
+        border-radius: 10px !important;
         font-family: 'Source Code Pro', monospace !important;
+        font-size: 1rem !important;
+    }
+    div[data-baseweb="textarea"] textarea:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 2px rgba(78, 161, 255, 0.25) !important;
     }
 
     /* Header area */
@@ -55,11 +72,13 @@ st.markdown("""
     .title-text {
         font-size: 2.2rem;
         font-weight: 700;
-        color: #ffffff;
+        color: #f7fbff;
+        letter-spacing: 0.2px;
+        text-shadow: 0 2px 18px rgba(78, 161, 255, 0.3);
     }
     .dev-tag {
         font-size: 1.1rem;
-        color: #58a6ff;
+        color: #72b7ff;
         font-weight: 600;
         margin-top: 0.5rem;
         text-align: left;
@@ -68,32 +87,53 @@ st.markdown("""
     /* Button style */
     .stButton>button {
         width: 100%;
-        background-color: #21262d;
-        color: #ffffff;
-        border: 1px solid #30363d;
+        background-color: #1b263a;
+        color: #eaf2ff;
+        border: 1px solid var(--border);
         padding: 0.6rem;
-        border-radius: 6px;
-        transition: 0.2s;
+        border-radius: 10px;
+        transition: 0.2s ease;
     }
     .stButton>button:hover {
-        background-color: #30363d;
-        border-color: #8b949e;
+        background-color: #24344f;
+        border-color: #5f82b3;
         color: #ffffff;
+        transform: translateY(-1px);
     }
     .stButton>button[kind="primary"] {
         font-size: 1.15rem;
         font-weight: 700;
         padding: 0.9rem 1rem;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+        border-color: #4a9cff;
+        color: #ffffff;
+        box-shadow: 0 8px 22px rgba(47, 129, 247, 0.35);
+    }
+    .stButton>button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #5aa9ff 0%, #3b8cff 100%);
+        border-color: #7bb7ff;
+        box-shadow: 0 10px 24px rgba(47, 129, 247, 0.45);
+    }
+
+    div[data-baseweb="select"] > div {
+        background-color: var(--bg-input) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px !important;
+    }
+    div[data-baseweb="select"] span {
+        color: var(--text-main) !important;
     }
 
     /* Sidebar dark mode */
     section[data-testid="stSidebar"] {
-        background-color: #010409 !important;
+        background: linear-gradient(180deg, #0c1422 0%, #0a111d 100%) !important;
+        border-right: 1px solid #1f2f4a;
     }
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label p,
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label span {
         font-size: 1.35rem !important;
         font-weight: 700 !important;
+        color: #dcebff !important;
     }
     
     /* Remove extra top spacing */
@@ -115,6 +155,11 @@ st.markdown("""
         font-size: 1.2rem;
         box-shadow: 0 8px 24px rgba(1, 4, 9, 0.6);
         animation: fadeOutCenterNotice 1.8s ease forwards;
+    }
+    div[data-testid="stCodeBlock"] pre {
+        border: 1px solid var(--border) !important;
+        border-radius: 10px !important;
+        background-color: #0f1726 !important;
     }
     @keyframes fadeOutCenterNotice {
         0% { opacity: 0; }
@@ -234,14 +279,15 @@ if st.session_state["last_result_json"] is not None:
             <div style="display:flex;justify-content:flex-end;align-items:center;height:44px;">
               <button id="copyJsonBtn" style="
                 width: 100%;
-                background-color: #21262d;
+                background: linear-gradient(135deg, #4ea1ff 0%, #2f81f7 100%);
                 color: #ffffff;
-                border: 1px solid #30363d;
-                border-radius: 6px;
+                border: 1px solid #4a9cff;
+                border-radius: 10px;
                 font-size: 0.95rem;
-                font-weight: 600;
+                font-weight: 700;
                 padding: 0.55rem 0.7rem;
                 cursor: pointer;
+                box-shadow: 0 8px 20px rgba(47, 129, 247, 0.35);
               ">📋 Copy JSON</button>
             </div>
             <script>
