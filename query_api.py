@@ -242,12 +242,20 @@ st.markdown("""
         overflow: hidden !important;
     }
     div[data-testid="stJson"] > div {
-        background-color: #0f1726 !important;
+        background-color: #eaf1fb !important;
     }
     div[data-testid="stJson"] pre,
     div[data-testid="stJson"] code {
-        background-color: #0f1726 !important;
-        color: #eaf3ff !important;
+        background-color: #eaf1fb !important;
+        color: #0f1f36 !important;
+    }
+    div[data-testid="stJson"] * {
+        opacity: 1 !important;
+    }
+    div[data-testid="stJson"] span,
+    div[data-testid="stJson"] p,
+    div[data-testid="stJson"] div {
+        color: #0f1f36 !important;
     }
     section[data-testid="stSidebar"] div[data-testid="stCodeBlock"] pre {
         background-color: #0d1a2e !important;
