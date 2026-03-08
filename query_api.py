@@ -44,6 +44,12 @@ st.markdown("""
         background: radial-gradient(circle at 15% 0%, #1a2740 0%, var(--bg-main) 45%);
         color: var(--text-main);
     }
+    header[data-testid="stHeader"],
+    .stToolbar,
+    #MainMenu,
+    footer {
+        display: none !important;
+    }
     
     /* Text area styling: dark background with light text */
     div[data-baseweb="textarea"] textarea {
@@ -126,14 +132,52 @@ st.markdown("""
 
     /* Sidebar dark mode */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0c1422 0%, #0a111d 100%) !important;
-        border-right: 1px solid #1f2f4a;
+        background: linear-gradient(180deg, #14233a 0%, #0d1728 100%) !important;
+        border-right: 1px solid #36537f;
+    }
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] label {
+        color: #eaf3ff !important;
+        opacity: 1 !important;
+    }
+    section[data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        text-shadow: 0 2px 12px rgba(78, 161, 255, 0.25);
+    }
+    section[data-testid="stSidebar"] hr {
+        border-color: #3a5885 !important;
     }
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label p,
     section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label span {
         font-size: 1.35rem !important;
         font-weight: 700 !important;
-        color: #dcebff !important;
+        color: #f0f7ff !important;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: #0f1c31 !important;
+        border: 1.5px solid #3a5b8a !important;
+        box-shadow: 0 0 0 1px rgba(78, 161, 255, 0.12) inset;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+        color: #f7fbff !important;
+        fill: #f7fbff !important;
+        opacity: 1 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stRadio"] label span {
+        color: #f0f7ff !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+        color: #c2d7ef !important;
+        font-size: 0.98rem !important;
     }
     
     /* Remove extra top spacing */
