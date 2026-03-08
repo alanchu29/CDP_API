@@ -170,6 +170,22 @@ st.markdown("""
         fill: #f7fbff !important;
         opacity: 1 !important;
     }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] input,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="singleValue"],
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="placeholder"] {
+        color: #f7fbff !important;
+        -webkit-text-fill-color: #f7fbff !important;
+        opacity: 1 !important;
+        font-weight: 700 !important;
+    }
+    section[data-testid="stSidebar"] div[role="listbox"] div[role="option"] {
+        color: #f4f9ff !important;
+        background-color: #0f1c31 !important;
+    }
+    section[data-testid="stSidebar"] div[role="listbox"] div[role="option"][aria-selected="true"] {
+        background-color: #1f3557 !important;
+        color: #ffffff !important;
+    }
     section[data-testid="stSidebar"] [data-testid="stRadio"] label span {
         color: #f0f7ff !important;
         font-weight: 700 !important;
@@ -204,6 +220,15 @@ st.markdown("""
         border: 1px solid var(--border) !important;
         border-radius: 10px !important;
         background-color: #0f1726 !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stCodeBlock"] pre {
+        background-color: #0d1a2e !important;
+        border: 1.5px solid #3a5b8a !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stCodeBlock"] pre code {
+        color: #eef5ff !important;
+        background: transparent !important;
+        font-weight: 600 !important;
     }
     @keyframes fadeOutCenterNotice {
         0% { opacity: 0; }
