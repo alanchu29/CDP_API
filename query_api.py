@@ -483,7 +483,24 @@ if st.session_state["last_result_json"] is not None:
             height=48,
         )
     st.markdown(
-        f"<pre class='json-response-box'>{escaped_result_json}</pre>",
+        f"""
+        <pre style="
+            margin: 0;
+            padding: 1rem 1.1rem;
+            border: 1.5px solid #2e466c;
+            border-radius: 10px;
+            background-color: #0f1726;
+            color: #eaf3ff;
+            font-family: 'Source Code Pro', Consolas, monospace;
+            font-size: 0.97rem;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            tab-size: 4;
+            overflow: auto;
+            max-height: 62vh;
+        ">{escaped_result_json}</pre>
+        """,
         unsafe_allow_html=True
     )
 
