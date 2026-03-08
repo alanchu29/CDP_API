@@ -81,11 +81,19 @@ st.markdown("""
     div[data-testid="stJson"] [role="tree"] {
         background-color: #0f1726 !important;
     }
-    div[data-testid="stJson"] *,
+    div[data-testid="stJson"] * {
+        opacity: 1 !important;
+    }
     div[data-testid="stJson"] span,
     div[data-testid="stJson"] p {
-        color: #eaf3ff !important;
-        opacity: 1 !important;
+        background: transparent !important;
+    }
+    div[data-testid="stJson"] span[class*="null"],
+    div[data-testid="stJson"] span[title="null"],
+    div[data-testid="stJson"] span[aria-label="null"] {
+        color: #ffb4b4 !important;
+        background: transparent !important;
+        font-weight: 700 !important;
     }
 
     /* Header area */
@@ -489,7 +497,7 @@ if st.session_state["last_result_json"] is not None:
             """,
             height=48,
         )
-    st.json(result_json, expanded=1)
+    st.json(result_json, expanded=True)
 
 # Footer
 st.divider()
