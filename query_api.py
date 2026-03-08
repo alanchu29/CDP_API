@@ -164,19 +164,22 @@ st.markdown("""
         border: 1.5px solid #3a5b8a !important;
         box-shadow: 0 0 0 1px rgba(78, 161, 255, 0.12) inset;
     }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] *,
     section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] input,
     section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
         color: #f7fbff !important;
         fill: #f7fbff !important;
-        opacity: 1 !important;
-    }
-    section[data-testid="stSidebar"] div[data-baseweb="select"] input,
-    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="singleValue"],
-    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="placeholder"] {
-        color: #f7fbff !important;
         -webkit-text-fill-color: #f7fbff !important;
         opacity: 1 !important;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="singleValue"],
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="ValueContainer"] * {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
         font-weight: 700 !important;
+        text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
     }
     section[data-testid="stSidebar"] div[role="listbox"] div[role="option"] {
         color: #f4f9ff !important;
@@ -194,6 +197,18 @@ st.markdown("""
     section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
         color: #c2d7ef !important;
         font-size: 0.98rem !important;
+    }
+    .api-endpoint-box {
+        background-color: #0d1a2e;
+        border: 1.5px solid #3a5b8a;
+        color: #f3f8ff;
+        border-radius: 10px;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.95rem;
+        font-family: "Source Code Pro", "Consolas", monospace;
+        font-weight: 700;
+        line-height: 1.35;
+        word-break: break-all;
     }
     
     /* Remove extra top spacing */
@@ -294,7 +309,10 @@ with st.sidebar:
     st.caption(f"Current environment: {api_environment}")
     st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d')}")
     st.caption("Current API endpoint")
-    st.code(API_URL, language=None)
+    st.markdown(
+        f"<div class='api-endpoint-box'>{API_URL}</div>",
+        unsafe_allow_html=True
+    )
 
 # --- Main input area ---
 st.markdown("### 📋 Enter Serial Number (SN)")
