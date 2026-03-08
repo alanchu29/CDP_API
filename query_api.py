@@ -86,12 +86,27 @@ st.markdown("""
     }
     div[data-testid="stJson"] span,
     div[data-testid="stJson"] p {
+        color: #e8f1ff !important;
         background: transparent !important;
+    }
+    div[data-testid="stJson"] span[class*="key"] {
+        color: #7fd1ff !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stJson"] span[class*="string"] {
+        color: #ffd39b !important;
+    }
+    div[data-testid="stJson"] span[class*="number"] {
+        color: #90f2b0 !important;
+    }
+    div[data-testid="stJson"] span[class*="boolean"] {
+        color: #d6b3ff !important;
+        font-weight: 700 !important;
     }
     div[data-testid="stJson"] span[class*="null"],
     div[data-testid="stJson"] span[title="null"],
     div[data-testid="stJson"] span[aria-label="null"] {
-        color: #ffb4b4 !important;
+        color: #ff9da1 !important;
         background: transparent !important;
         font-weight: 700 !important;
     }
