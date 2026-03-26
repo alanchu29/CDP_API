@@ -388,10 +388,20 @@ if send_clicked:
         payload["SN"] = sn_list
 
     headers = {'Content-Type': 'application/json'}
+    post_kwargs = {
+        "headers": headers,
+        "data": json.dumps(payload),
+        "timeout": 15,
+    }
+    if sn_list:
+        post_kwargs["params"] = {
+            "HwkeyDownloadStatus": "all",
+            "GPkeyDownloadStatus": "all",
+        }
 
     with st.spinner('Connecting...'):
         try:
-            response = requests.post(API_URL, headers=headers, data=json.dumps(payload), timeout=15)
+            response = requests.post(API_URL, **post_kwargs)
             
             if response.status_code == 200:
                 result_json = response.json()
