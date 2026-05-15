@@ -319,7 +319,7 @@ st.markdown("<p style='text-align: center; color: #8b949e;'>Enter serial numbers
 with st.sidebar:
     st.subheader("⚙️ Settings")
     
-    site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN', 'WYMUS']
+    site_options = ['WCZ', 'WYMY', 'WYMX', 'WYTN', 'WYMUS', 'WYLZ']
     site = st.selectbox(
         "SITE",
         options=site_options,
