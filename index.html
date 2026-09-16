@@ -97,7 +97,7 @@
     color: var(--text-faint);
     margin-bottom: 6px;
   }
-  select, textarea, input[type="search"] {
+  select, textarea, input[type="search"], input[type="number"] {
     width: 100%;
     background: var(--bg-elevated);
     color: var(--text);
@@ -134,6 +134,49 @@
     opacity: 0.7;
   }
   .msg.warn { background: rgba(255, 196, 87, 0.08); border-color: rgba(255, 196, 87, 0.35); color: #ffd98a; }
+  .field-note { margin-top: 6px; font-size: 0.73rem; color: #ffd98a; opacity: 0.85; line-height: 1.4; }
+
+  /* Pending-queue summary: when no SN is given the answer is "how many and which" */
+  .pending {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .pending-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .pending-head .title { font-size: 0.9rem; font-weight: 650; }
+  .pending-head .title .sub { color: var(--text-faint); font-weight: 400; margin-left: 8px; font-size: 0.82rem; }
+  .pending-stats { display: flex; gap: 22px; align-items: baseline; }
+  .pending-stat { display: flex; align-items: baseline; gap: 6px; }
+  .pending-stat b {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .pending-stat span { font-size: 0.8rem; color: var(--text-dim); }
+  .sn-list {
+    max-height: 176px;
+    overflow: auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.75;
+    word-break: break-all;
+  }
   .sn-count { font-size: 0.76rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
   .sn-count b { color: var(--accent); font-weight: 700; }
 
@@ -469,6 +512,13 @@
           <option value="c41ae">c41ae</option>
         </select>
       </div>
+      <div>
+        <label class="lbl" for="rowLimit">Row Limit <span class="opt">選填</span></label>
+        <input type="number" id="rowLimit" min="1" step="1" placeholder="不限（帶 SN 查詢時上限 1000）">
+        <div class="field-note" id="rowLimitNote" hidden>
+          ⚠ PRD 目前尚未部署此參數，送出後可能不生效
+        </div>
+      </div>
     </div>
 
     <div class="sn-head">
@@ -505,6 +555,8 @@
       <button type="button" class="btn sm" id="copyBtn">複製 JSON</button>
     </div>
 
+    <div class="pending" id="pendingPanel" hidden></div>
+
     <div id="tableView">
       <div class="table-scroll"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     </div>
@@ -525,8 +577,22 @@
   'use strict';
 
   const $ = (id) => document.getElementById(id);
-  const LONG_VALUE_CHARS = 120;   // columns wider than this are hidden by default
+  const LONG_VALUE_CHARS = 120;
   const CELL_TRUNCATE = 60;
+
+  // Columns shown by default, in this order. SN leads because it is what
+  // every lookup starts from. Anything else the response carries is still
+  // available through the column picker, just hidden.
+  const DEFAULT_COLUMNS = [
+    'SN',
+    'PN',
+    'PN_Type',
+    'SI_Factory',
+    'Hwkey_Download_Status',
+    'GPkey_Download_Status',
+    'Hwkey_Download_LocalTime',
+    'GPkey_Download_Time',
+  ];
 
   const state = {
     env: 'prd',
@@ -613,9 +679,18 @@
     $(id).addEventListener('change', () => { store(id, $(id).value); resetResults(); });
   });
 
+  $('rowLimit').addEventListener('input', () => {
+    // PRD had not deployed ROW_LIMIT as of 2026-09-16; say so rather than
+    // letting the field look broken. Remove this once it takes effect.
+    $('rowLimitNote').hidden = !$('rowLimit').value.trim();
+    resetResults();
+  });
+
   $('clear').addEventListener('click', () => {
     $('sn').value = '';
     $('sn').dispatchEvent(new Event('input'));
+    $('rowLimit').value = '';
+    $('rowLimitNote').hidden = true;
     resetResults();
     $('sn').focus();
   });
@@ -644,6 +719,16 @@
     const btn = $('send');
     const sn = parseSns($('sn').value);
     const body = { env: state.env, site: $('site').value, type: $('type').value, sn };
+
+    const rowLimitRaw = $('rowLimit').value.trim();
+    if (rowLimitRaw) {
+      const rowLimit = Number(rowLimitRaw);
+      if (!Number.isInteger(rowLimit) || rowLimit < 1) {
+        showMessage('error', 'Row Limit 必須是大於 0 的整數，或留空表示不限。');
+        return;
+      }
+      body.rowLimit = rowLimit;
+    }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>查詢中…';
@@ -714,12 +799,21 @@
       }
     }
 
-    // Certificates and keys are hundreds of characters long; showing them as
-    // columns makes the table unreadable, and the row detail shows them in full.
-    state.columns = keys.map((key) => ({
+    // Preferred columns lead, in the order declared; everything the response
+    // also carries follows in its original order.
+    const preferred = DEFAULT_COLUMNS.filter((k) => seen.has(k));
+    const ordered = preferred.concat(keys.filter((k) => !DEFAULT_COLUMNS.includes(k)));
+
+    // A TYPE that returns none of the preferred columns would otherwise open
+    // with an empty table, so fall back to hiding only certificate-sized blobs.
+    const usePreferred = preferred.length > 0;
+
+    state.columns = ordered.map((key) => ({
       key,
       long: (maxLen[key] || 0) > LONG_VALUE_CHARS,
-      hidden: (maxLen[key] || 0) > LONG_VALUE_CHARS,
+      hidden: usePreferred
+        ? !DEFAULT_COLUMNS.includes(key)
+        : (maxLen[key] || 0) > LONG_VALUE_CHARS,
     }));
 
     renderColsMenu();
@@ -798,10 +892,43 @@
 
   /* ---------- render ---------- */
 
+  // A query with no SN returns the pending-download queue. What matters then
+  // is how many are waiting and which serials they are, not the field detail.
+  function isPendingQuery() {
+    return !!state.lastQuery && Array.isArray(state.lastQuery.sn) && state.lastQuery.sn.length === 0;
+  }
+
+  function renderPendingPanel() {
+    const el = $('pendingPanel');
+    if (!isPendingQuery()) { el.hidden = true; return; }
+
+    const sns = [...new Set(state.records.map((r) => r.SN).filter(Boolean))];
+    el.hidden = false;
+    el.innerHTML =
+      '<div class="pending-head">' +
+      '<div class="title">待處理佇列<span class="sub">尚未下載金鑰的記錄</span></div>' +
+      '<button type="button" class="btn sm" id="copySnBtn">複製 SN 清單</button>' +
+      '</div>' +
+      '<div class="pending-stats">' +
+      `<div class="pending-stat"><b>${sns.length}</b><span>個 SN</span></div>` +
+      `<div class="pending-stat"><b>${state.records.length}</b><span>筆記錄</span></div>` +
+      '</div>' +
+      (sns.length ? `<div class="sn-list" style="margin-top:12px">${sns.map(escapeHtml).join('<br>')}</div>` : '');
+
+    const btn = $('copySnBtn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        copyText(sns.join('\n'), `已複製 ${sns.length} 個 SN`);
+      });
+    }
+  }
+
   function render() {
     const rows = visibleRows();
     const snCount = new Set(state.records.map((r) => r.SN).filter(Boolean)).size;
     const ms = state.lastQuery ? state.lastQuery.elapsedMs : 0;
+
+    renderPendingPanel();
 
     $('summary').innerHTML =
       '<b>' + state.records.length + '</b> 筆記錄' +
