@@ -691,7 +691,10 @@
 
   <div id="tab-manual" hidden>
     <section class="panel">
-      <label class="lbl">Request</label>
+      <div class="sn-head">
+        <label class="lbl">Request</label>
+        <span class="sn-count" id="seedNote"></span>
+      </div>
       <div class="url-box" id="manualUrl"></div>
 
       <div style="margin-top:18px">
@@ -716,6 +719,8 @@
 
       <div class="actions">
         <button type="button" class="btn primary" id="manualSend">送出</button>
+        <button type="button" class="btn" id="copyCurl">複製 cURL</button>
+        <button type="button" class="btn" id="copyReport">複製完整記錄</button>
         <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 送出</span>
       </div>
 
@@ -773,6 +778,7 @@
     filter: '',
     view: 'table',
     lastQuery: null,
+    lastRequest: null,   // what the proxy actually sent upstream
   };
 
   /* ---------- helpers ---------- */
@@ -913,6 +919,10 @@
         body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => null);
+
+      // Kept even when the query failed — a failing request is exactly the
+      // one worth inspecting on the manual tab or sending to IT.
+      if (data && data.request) state.lastRequest = data.request;
 
       if (!res.ok) {
         const err = (data && data.error) || ('HTTP ' + res.status);
@@ -1267,7 +1277,20 @@
       });
       $('tab-query').hidden = btn.dataset.tab !== 'query';
       $('tab-manual').hidden = btn.dataset.tab !== 'manual';
-      if (btn.dataset.tab === 'manual') { renderManualUrl(); $('manualBody').focus(); }
+      if (btn.dataset.tab !== 'manual') return;
+
+      // Opening the manual tab should show whatever the query tab last sent.
+      // An edited body is left alone — the note offers to load it instead.
+      if (state.lastRequest && !manualDirty) {
+        seedManual(state.lastRequest, { silent: true });
+      } else if (state.lastRequest && manualDirty) {
+        $('seedNote').innerHTML =
+          '查詢分頁有較新的 request <button type="button" class="btn sm" id="seedNow">帶入</button>';
+        const b = $('seedNow');
+        if (b) b.addEventListener('click', () => seedManual(state.lastRequest));
+      }
+      renderManualUrl();
+      $('manualBody').focus();
     });
   });
 
@@ -1336,7 +1359,11 @@
     }
   }
 
-  $('manualBody').addEventListener('input', checkManualJson);
+  $('manualBody').addEventListener('input', () => {
+    manualDirty = true;
+    $('seedNote').textContent = '';
+    checkManualJson();
+  });
   $('manualBody').addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendManual(); }
   });
@@ -1348,24 +1375,113 @@
     checkManualJson();
   });
 
+  // Tracks whether the body has been hand-edited since it was last seeded,
+  // so a query on the other tab never silently discards someone's work.
+  let manualDirty = false;
+
+  // Seeds from the request the proxy actually sent, not from the form, so the
+  // manual tab shows the parameters the proxy added and the keys it dropped.
+  function seedManual(request, { silent = false } = {}) {
+    if (!request) return;
+    $('manualBody').value = JSON.stringify(request.body, null, 2);
+    checkManualJson();
+
+    $('paramRows').innerHTML = '';
+    (request.params || []).forEach((p) => addParamRow(p.key, p.value));
+    if (!(request.params || []).length) renderManualUrl();
+
+    manualDirty = false;
+    $('seedNote').textContent = '已帶入查詢分頁最後一次送出的 request';
+    if (!silent) toast('已帶入查詢分頁的 request');
+  }
+
   $('manualSeed').addEventListener('click', () => {
+    if (state.lastRequest) { seedManual(state.lastRequest); return; }
+
+    // No query has run yet, so fall back to what the form currently holds.
     const payload = { TYPE: $('type').value };
     if ($('site').value) payload.SITE = $('site').value;
     const sn = parseSns($('sn').value);
     if (sn.length) payload.SN = sn;
     const limit = $('rowLimit').value.trim();
     if (limit) payload.ROW_LIMIT = Number(limit);
-    $('manualBody').value = JSON.stringify(payload, null, 2);
-    checkManualJson();
+    const params = sn.length
+      ? [{ key: 'HwkeyDownloadStatus', value: 'all' }, { key: 'GPkeyDownloadStatus', value: 'all' }]
+      : [];
+    seedManual({ body: payload, params });
+  });
 
-    // Mirror what guided mode would send, so the two tabs stay comparable.
-    $('paramRows').innerHTML = '';
-    if (sn.length) {
-      addParamRow('HwkeyDownloadStatus', 'all');
-      addParamRow('GPkeyDownloadStatus', 'all');
+  /* ---------- developer-mode export ---------- */
+
+  function shellQuote(s) {
+    return "'" + String(s).replace(/'/g, "'\\''") + "'";
+  }
+
+  function currentRequest() {
+    const url = new URL(endpoint());
+    paramList().forEach((p) => url.searchParams.append(p.key, p.value));
+    let body = $('manualBody').value.trim();
+    try { body = JSON.stringify(JSON.parse(body)); } catch { /* keep as typed */ }
+    return { url: url.toString(), body };
+  }
+
+  $('copyCurl').addEventListener('click', () => {
+    const { url, body } = currentRequest();
+    const curl = [
+      'curl -X POST ' + shellQuote(url),
+      "  -H 'Content-Type: application/json'",
+      '  -d ' + shellQuote(body),
+    ].join(' \\\n');
+    copyText(curl, '已複製 cURL 指令');
+  });
+
+  $('copyReport').addEventListener('click', () => {
+    const { url, body } = currentRequest();
+    let pretty = body;
+    try { pretty = JSON.stringify(JSON.parse(body), null, 2); } catch { /* keep as typed */ }
+
+    const lines = [
+      '# Cerberus sn_info — 請求記錄',
+      '',
+      '時間：' + new Date().toISOString(),
+      '環境：' + state.env.toUpperCase(),
+      '',
+      '## Request',
+      '',
+      'POST ' + url,
+      'Content-Type: application/json',
+      '',
+      '```json',
+      pretty,
+      '```',
+      '',
+    ];
+
+    if (lastManualResponse) {
+      const r = lastManualResponse;
+      let respPretty = r.bodyText;
+      try { respPretty = JSON.stringify(JSON.parse(r.bodyText), null, 2); } catch { /* keep raw */ }
+      // Keep the report pasteable: certificate payloads run to megabytes.
+      const CAP = 20000;
+      const clipped = respPretty.length > CAP;
+      if (clipped) respPretty = respPretty.slice(0, CAP);
+
+      lines.push(
+        '## Response',
+        '',
+        'HTTP ' + r.status + ' · ' + r.elapsedMs + ' ms · ' + r.byteLength + ' bytes' +
+          (r.records ? ' · ' + r.records.length + ' 筆記錄' : ''),
+        '',
+        '```json',
+        r.bodyText.trim() ? respPretty : '(回應 body 完全空白)',
+        '```',
+      );
+      if (clipped) lines.push('', '> 回應內容過長，此處截斷至前 ' + CAP + ' 字元。');
+    } else {
+      lines.push('## Response', '', '（尚未送出，無回應記錄）');
     }
-    renderManualUrl();
-    toast('已帶入查詢分頁的條件');
+
+    copyText(lines.join('\n'), '已複製完整記錄，可直接貼給 IT');
   });
 
   async function sendManual() {
@@ -1409,10 +1525,10 @@
 
   $('manualSend').addEventListener('click', sendManual);
 
-  let lastManualBody = '';
+  let lastManualResponse = null;
 
   function renderManualResponse(data) {
-    lastManualBody = data.bodyText;
+    lastManualResponse = data;
     $('manualResult').hidden = false;
 
     $('respStatus').className = 'status-pill s' + String(data.status).charAt(0);
@@ -1453,7 +1569,7 @@
   }
 
   $('respCopy').addEventListener('click', () => {
-    copyText(lastManualBody, '已複製回應內容');
+    copyText(lastManualResponse ? lastManualResponse.bodyText : '', '已複製回應內容');
   });
 
   /* ---------- init ---------- */

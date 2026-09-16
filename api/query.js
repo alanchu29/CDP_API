@@ -81,9 +81,21 @@ async function handleGuided(res, env, body) {
     url.searchParams.set('GPkeyDownloadStatus', 'all');
   }
 
+  // The proxy decides things the form cannot see — whether the status
+  // parameters were added, which keys were dropped — so report the request
+  // that actually went upstream. The manual tab replays it verbatim, and it
+  // is what gets handed to IT when something needs explaining.
+  const request = {
+    url: url.toString(),
+    body: payload,
+    params: [...url.searchParams].map(([key, value]) => ({ key, value })),
+  };
+
   const call = await callUpstream(url, payload);
 
-  if (call.error) return res.status(call.status).json({ error: call.error, elapsedMs: call.elapsedMs });
+  if (call.error) {
+    return res.status(call.status).json({ error: call.error, elapsedMs: call.elapsedMs, request });
+  }
 
   if (!call.ok) {
     return res.status(502).json({
@@ -91,13 +103,14 @@ async function handleGuided(res, env, body) {
       upstreamStatus: call.status,
       upstreamBody: call.text.slice(0, 2000),
       elapsedMs: call.elapsedMs,
+      request,
     });
   }
 
   // The upstream answers 200 with a completely empty body when nothing
   // matches, so treat that as "no rows" rather than as a parse failure.
   if (!call.text.trim()) {
-    return res.status(200).json({ records: [], elapsedMs: call.elapsedMs, empty: true, truncated: false });
+    return res.status(200).json({ records: [], elapsedMs: call.elapsedMs, empty: true, truncated: false, request });
   }
 
   let parsed;
@@ -108,6 +121,7 @@ async function handleGuided(res, env, body) {
       error: 'Upstream returned a 200 response that is not valid JSON.',
       upstreamBody: call.text.slice(0, 2000),
       elapsedMs: call.elapsedMs,
+      request,
     });
   }
 
@@ -130,6 +144,7 @@ async function handleGuided(res, env, body) {
     empty: records.length === 0,
     truncated: hitCap !== undefined,
     cap: hitCap,
+    request,
   });
 }
 
