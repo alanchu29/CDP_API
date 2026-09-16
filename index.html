@@ -136,6 +136,124 @@
   .msg.warn { background: rgba(255, 196, 87, 0.08); border-color: rgba(255, 196, 87, 0.35); color: #ffd98a; }
   .field-note { margin-top: 6px; font-size: 0.73rem; color: #ffd98a; opacity: 0.85; line-height: 1.4; }
 
+  /* ---------- Tabs ---------- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tabs button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font: inherit;
+    font-weight: 600;
+    padding: 9px 14px;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tabs button:hover { color: var(--text); }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ---------- Manual request tab ---------- */
+  .url-box {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 11px;
+    font-family: var(--mono);
+    font-size: 0.79rem;
+    color: var(--text-dim);
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .url-box b { color: var(--accent); font-weight: 700; }
+  .method-pill {
+    display: inline-block;
+    background: var(--accent-dim);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+  .param-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .param-row input {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    width: 100%;
+  }
+  .param-row input:focus {
+    outline: 0;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(78, 161, 255, 0.16);
+  }
+  .param-row button {
+    appearance: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    border-radius: 8px;
+    width: 34px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .param-row button:hover { color: var(--bad, #ff7b72); border-color: #5a3a3a; }
+  .param-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+  .empty-params { color: var(--text-faint); font-size: 0.8rem; padding: 4px 0 10px; }
+
+  #manualBody {
+    min-height: 210px;
+    font-size: 0.83rem;
+    tab-size: 2;
+  }
+  .json-status {
+    margin-top: 7px;
+    font-size: 0.78rem;
+    font-family: var(--mono);
+    min-height: 1.2em;
+  }
+  .json-status.ok { color: var(--good, #46d98a); }
+  .json-status.bad { color: var(--bad, #ff7b72); }
+
+  .resp-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .status-pill {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 4px 10px;
+    border-radius: 7px;
+    border: 1px solid;
+  }
+  .status-pill.s2 { color: #46d98a; border-color: rgba(70, 217, 138, 0.45); background: rgba(70, 217, 138, 0.1); }
+  .status-pill.s4, .status-pill.s5 { color: #ff7b72; border-color: rgba(255, 123, 114, 0.45); background: rgba(255, 123, 114, 0.1); }
+  .resp-meta { color: var(--text-faint); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .resp-meta .sep { margin: 0 7px; opacity: 0.5; }
+
   /* Pending-queue summary: when no SN is given the answer is "how many and which" */
   .pending {
     background: var(--surface);
@@ -490,6 +608,12 @@
     </div>
   </header>
 
+  <nav class="tabs" role="tablist">
+    <button type="button" data-tab="query" aria-selected="true">查詢</button>
+    <button type="button" data-tab="manual" aria-selected="false">手動 JSON</button>
+  </nav>
+
+  <div id="tab-query">
   <section class="panel">
     <div class="field-row">
       <div>
@@ -563,6 +687,53 @@
     <div id="jsonView" hidden><pre class="json" id="jsonPre"></pre></div>
     <div id="noMatch" class="empty-state" hidden>沒有符合篩選條件的記錄。</div>
   </section>
+  </div>
+
+  <div id="tab-manual" hidden>
+    <section class="panel">
+      <label class="lbl">Request</label>
+      <div class="url-box" id="manualUrl"></div>
+
+      <div style="margin-top:18px">
+        <label class="lbl">Query Parameters</label>
+        <div id="paramRows"></div>
+        <div class="param-actions">
+          <button type="button" class="btn sm" id="addParam">+ 空白參數</button>
+          <button type="button" class="btn sm" data-quick="HwkeyDownloadStatus">+ HwkeyDownloadStatus=all</button>
+          <button type="button" class="btn sm" data-quick="GPkeyDownloadStatus">+ GPkeyDownloadStatus=all</button>
+        </div>
+      </div>
+
+      <div class="sn-head">
+        <label class="lbl" for="manualBody">Request Body (JSON)</label>
+        <span class="sn-count">
+          <button type="button" class="btn sm" id="manualFormat">格式化</button>
+          <button type="button" class="btn sm" id="manualSeed">帶入查詢分頁條件</button>
+        </span>
+      </div>
+      <textarea id="manualBody" spellcheck="false"></textarea>
+      <div class="json-status" id="jsonStatus"></div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="manualSend">送出</button>
+        <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 送出</span>
+      </div>
+
+      <div id="manualMessage"></div>
+    </section>
+
+    <section class="results" id="manualResult" hidden>
+      <div class="resp-head">
+        <span class="status-pill" id="respStatus"></span>
+        <span class="resp-meta" id="respMeta"></span>
+        <span style="margin-left:auto;display:flex;gap:8px">
+          <button type="button" class="btn sm" id="respToTable" hidden>在表格檢視開啟</button>
+          <button type="button" class="btn sm" id="respCopy">複製回應</button>
+        </span>
+      </div>
+      <pre class="json" id="respBody"></pre>
+    </section>
+  </div>
 
   <footer>
     <span>Wiwynn Corporation &middot; Internal Tool &middot; Dixon Chu</span>
@@ -650,6 +821,7 @@
       });
       store('env', state.env);
       $('epLabel').textContent = endpoint();
+      renderManualUrl();
       resetResults();
     });
   });
@@ -1083,7 +1255,213 @@
       });
   }
 
+  /* ---------- manual JSON tab ---------- */
+
+  const DEFAULT_MANUAL_BODY = JSON.stringify(
+    { SITE: 'WYMX', TYPE: 'm1120', SN: ['M1304365003B53823450076'] }, null, 2);
+
+  document.querySelectorAll('.tabs button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach((b) => {
+        b.setAttribute('aria-selected', String(b === btn));
+      });
+      $('tab-query').hidden = btn.dataset.tab !== 'query';
+      $('tab-manual').hidden = btn.dataset.tab !== 'manual';
+      if (btn.dataset.tab === 'manual') { renderManualUrl(); $('manualBody').focus(); }
+    });
+  });
+
+  function paramList() {
+    return [...$('paramRows').querySelectorAll('.param-row')].map((row) => {
+      const [k, v] = row.querySelectorAll('input');
+      return { key: k.value.trim(), value: v.value };
+    }).filter((p) => p.key);
+  }
+
+  function addParamRow(key = '', value = '') {
+    const row = document.createElement('div');
+    row.className = 'param-row';
+    row.innerHTML =
+      '<input placeholder="參數名稱" spellcheck="false">' +
+      '<input placeholder="值" spellcheck="false">' +
+      '<button type="button" title="移除">&#10005;</button>';
+    const [k, v] = row.querySelectorAll('input');
+    k.value = key;
+    v.value = value;
+    row.querySelectorAll('input').forEach((i) => i.addEventListener('input', renderManualUrl));
+    row.querySelector('button').addEventListener('click', () => { row.remove(); renderManualUrl(); });
+    $('paramRows').appendChild(row);
+    renderManualUrl();
+    return row;
+  }
+
+  $('addParam').addEventListener('click', () => addParamRow().querySelector('input').focus());
+  document.querySelectorAll('[data-quick]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const key = b.dataset.quick;
+      const existing = [...$('paramRows').querySelectorAll('.param-row')]
+        .find((r) => r.querySelector('input').value.trim() === key);
+      if (existing) { existing.querySelectorAll('input')[1].value = 'all'; renderManualUrl(); return; }
+      addParamRow(key, 'all');
+    });
+  });
+
+  function renderManualUrl() {
+    const url = new URL(endpoint());
+    paramList().forEach((p) => url.searchParams.append(p.key, p.value));
+    const [base, qs] = url.toString().split('?');
+    $('manualUrl').innerHTML =
+      '<span class="method-pill">POST</span>' + escapeHtml(base) +
+      (qs ? '<b>?' + escapeHtml(qs) + '</b>' : '');
+  }
+
+  function checkManualJson() {
+    const el = $('jsonStatus');
+    const text = $('manualBody').value.trim();
+    if (!text) { el.className = 'json-status'; el.textContent = ''; return null; }
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        el.className = 'json-status bad';
+        el.textContent = '✗ 最外層必須是物件 { }';
+        return null;
+      }
+      el.className = 'json-status ok';
+      el.textContent = '✓ JSON 有效 — ' + Object.keys(parsed).join(', ');
+      return parsed;
+    } catch (err) {
+      el.className = 'json-status bad';
+      el.textContent = '✗ ' + err.message;
+      return null;
+    }
+  }
+
+  $('manualBody').addEventListener('input', checkManualJson);
+  $('manualBody').addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendManual(); }
+  });
+
+  $('manualFormat').addEventListener('click', () => {
+    const parsed = checkManualJson();
+    if (!parsed) { toast('JSON 無效，無法格式化', false); return; }
+    $('manualBody').value = JSON.stringify(parsed, null, 2);
+    checkManualJson();
+  });
+
+  $('manualSeed').addEventListener('click', () => {
+    const payload = { TYPE: $('type').value };
+    if ($('site').value) payload.SITE = $('site').value;
+    const sn = parseSns($('sn').value);
+    if (sn.length) payload.SN = sn;
+    const limit = $('rowLimit').value.trim();
+    if (limit) payload.ROW_LIMIT = Number(limit);
+    $('manualBody').value = JSON.stringify(payload, null, 2);
+    checkManualJson();
+
+    // Mirror what guided mode would send, so the two tabs stay comparable.
+    $('paramRows').innerHTML = '';
+    if (sn.length) {
+      addParamRow('HwkeyDownloadStatus', 'all');
+      addParamRow('GPkeyDownloadStatus', 'all');
+    }
+    renderManualUrl();
+    toast('已帶入查詢分頁的條件');
+  });
+
+  async function sendManual() {
+    const payload = checkManualJson();
+    if (!payload) {
+      $('manualMessage').innerHTML =
+        '<div class="msg error">請先修正 Request Body 的 JSON。</div>';
+      return;
+    }
+
+    const btn = $('manualSend');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>送出中…';
+    $('manualMessage').innerHTML = '';
+
+    try {
+      const res = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'raw', env: state.env, payload, params: paramList() }),
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data || data.error) {
+        $('manualMessage').innerHTML =
+          '<div class="msg error">' + escapeHtml((data && data.error) || ('HTTP ' + res.status)) + '</div>';
+        $('manualResult').hidden = true;
+        return;
+      }
+
+      renderManualResponse(data);
+    } catch (err) {
+      $('manualMessage').innerHTML =
+        '<div class="msg error">無法連線到 proxy：' + escapeHtml(err.message) + '</div>';
+      $('manualResult').hidden = true;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '送出';
+    }
+  }
+
+  $('manualSend').addEventListener('click', sendManual);
+
+  let lastManualBody = '';
+
+  function renderManualResponse(data) {
+    lastManualBody = data.bodyText;
+    $('manualResult').hidden = false;
+
+    $('respStatus').className = 'status-pill s' + String(data.status).charAt(0);
+    $('respStatus').textContent = 'HTTP ' + data.status;
+
+    const kb = (data.byteLength / 1024).toFixed(1);
+    $('respMeta').innerHTML =
+      data.elapsedMs + ' ms<span class="sep">·</span>' + kb + ' KB' +
+      (data.records ? '<span class="sep">·</span>' + data.records.length + ' 筆記錄' : '') +
+      (data.byteLength === 0 ? '<span class="sep">·</span>空 body' : '');
+
+    // An empty body is the upstream's "no rows" answer, not an error —
+    // showing nothing at all would look like the request failed.
+    if (!data.bodyText.trim()) {
+      $('respBody').innerHTML = '<span class="ju">（回應 body 完全空白 — 上游用這種方式表示查無資料）</span>';
+    } else {
+      try {
+        $('respBody').innerHTML = highlightJson(JSON.parse(data.bodyText));
+      } catch {
+        $('respBody').textContent = data.bodyText;
+      }
+    }
+
+    const toTable = $('respToTable');
+    toTable.hidden = !data.records || !data.records.length;
+    toTable.onclick = () => {
+      state.records = data.records;
+      state.lastQuery = { sn: ['(manual)'], elapsedMs: data.elapsedMs };
+      state.filter = '';
+      state.sort = { key: null, dir: 1 };
+      $('filter').value = '';
+      buildColumns();
+      $('results').hidden = false;
+      $('message').innerHTML = '';
+      render();
+      document.querySelector('.tabs [data-tab="query"]').click();
+    };
+  }
+
+  $('respCopy').addEventListener('click', () => {
+    copyText(lastManualBody, '已複製回應內容');
+  });
+
   /* ---------- init ---------- */
+
+  $('manualBody').value = DEFAULT_MANUAL_BODY;
+  checkManualJson();
+  addParamRow('HwkeyDownloadStatus', 'all');
+  addParamRow('GPkeyDownloadStatus', 'all');
 
   if (store('env') === 'dev') document.querySelector('.seg [data-env="dev"]').click();
   const savedSite = store('site');

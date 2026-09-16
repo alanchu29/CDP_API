@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.3.0 — 2026-09-16
+
+新增「手動 JSON」分頁，可直接編輯 request body 與 query parameters 送出。
+
+### 手動 JSON 分頁
+
+- **Request Body 編輯器**：自由輸入 JSON，即時驗證並列出最外層欄位，錯誤時直接顯示 parser 訊息。附「格式化」按鈕。
+- **Query Parameters**：Postman 風格的 key / value 列，可自由增減；另有 `HwkeyDownloadStatus=all`、`GPkeyDownloadStatus=all` 兩個快速鍵。
+- **即時組出完整 URL**，query string 以強調色標出。
+- **帶入查詢分頁條件**：把查詢分頁目前的 SITE / TYPE / SN / Row Limit 轉成 JSON，連同 guided mode 會送的參數一併填好，方便兩邊對照。
+- **回應區顯示原貌**：HTTP 狀態碼、耗時、位元組數、記錄數，以及未經正規化的 body。上游的錯誤訊息（例如 `'HwkeyDownloadStatus' contains an unsupported value.`）會原封不動呈現 —— 查詢分頁會把這類回應包成 502，看不到原文。空 body 也會明確標示，而不是顯示成一片空白。
+- 回應若是陣列，可一鍵「在表格檢視開啟」，套用既有的表格、篩選與匯出功能。
+
+### 安全邊界
+
+- proxy 的 raw 模式**只接受 body 與 query parameters**，endpoint 與 method 固定為 `POST /sn_info`。規格中另外三支會寫入資料庫的 `PUT` API 無法從網頁觸及。
+- raw 模式限制：body 上限 1,000,000 字元、query parameter 最多 20 組。
+
+---
+
 ## 2.2.0 — 2026-09-16
 
 表格檢視改為以 SN 為主的固定版面，並補上查詢筆數限制。
