@@ -51,7 +51,7 @@ Content-Type: application/json
 | 欄位 | 型別 | 必填 | 大小寫 | 說明 |
 |---|---|---|---|---|
 | `TYPE` | String | **是** | 不分 | `overlake`、`agilex`、`m1120`、`SoC`、`CaP`、`c41ae` |
-| `SITE` | String | 否 | 不分 | `WCZ`、`WYMY`、`WYMX`、`WYTN`。**省略代表不限廠區** |
+| `SITE` | String | 否 | 不分 | `WCZ`、`WYMY`、`WYMX`、`WYTN`、`WYMUS`、`WYLZ`。**省略代表不限廠區** |
 | `SN` | List | 否 | **區分** | 序號陣列。省略或給 `[]` 都代表不限 SN |
 | `ROW_LIMIT` | Integer | 否 | — | 正整數。回傳筆數上限，見下方 |
 
@@ -60,6 +60,19 @@ Content-Type: application/json
 **任何欄位都不接受 JSON `null`** —— 不需要就整個省略該 key。`SN` 例外允許空陣列 `[]`。
 
 **`SN` 區分大小寫**，其餘欄位不分。所以不要對 SN 做大小寫正規化。
+
+> ### [實測] 廠區有六個，規格只寫了四個
+>
+> 規格 v4.3.0 的 `SITE` 說明寫「Four sites: WCZ,WYMY,WYMX,WYTN」，但實際使用中有六個 —— 舊版 Streamlit 分兩次加入：
+>
+> - `WYMUS`（commit `17f9f31`，2026-04-22）
+> - `WYLZ`（commit `e17d096`，2026-05-15）
+>
+> 佐證：規格自己的 `update_hwkey` SQL 裡就有 `WYMUSSendFlag` 欄位。規格的 `SITE` 說明單純沒跟上。
+>
+> **API 不會拒絕未知的廠區代號**，只是回空結果（實測 `BOGUS` 與其他無資料廠區的回應完全相同）。所以打錯字不會有任何錯誤提示，只會看起來像「查無資料」。新增廠區時要格外小心拼字。
+>
+> 同一份 SQL 另有 `WZSSendFlag` 欄位，暗示可能存在第七個廠區 `WZS`。它從未出現在本工具的清單中，也未經確認，因此沒有加入。
 
 ### Query parameters：`HwkeyDownloadStatus` / `GPkeyDownloadStatus`
 
