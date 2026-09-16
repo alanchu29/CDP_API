@@ -50,151 +50,244 @@
     --radius-lg: 12px;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
     --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Source Code Pro", Consolas, monospace;
+
+    /* Treatment — how surfaces, inputs and controls are drawn. This is what
+       separates the styles from each other; the layout never changes. */
+    --panel-bg: var(--surface);
+    --panel-border: 1px solid var(--border);
+    --panel-shadow: none;
+    --panel-pad: 18px;
+
+    --input-bg: var(--bg-elevated);
+    --input-border: 1px solid var(--border);
+    --input-radius: var(--radius);
+
+    --btn-bg: var(--bg-elevated);
+    --btn-border: 1px solid var(--border);
+    --btn-shadow: none;
+    --btn-primary-bg: var(--accent-dim);
+    --btn-primary-fg: var(--accent-on);
+    --btn-primary-border: 1px solid var(--accent);
+    --btn-primary-shadow: none;
+
+    --row-stripe: transparent;
+    --row-line: 1px solid var(--row-border);
+    --thead-line: 1px solid var(--border-strong);
+
+    --label-transform: uppercase;
+    --label-spacing: 0.08em;
+    --label-size: 0.72rem;
+    --label-weight: 700;
+    --h1-font: var(--font-ui);
+    --h1-weight: 650;
+    --h1-spacing: -0.01em;
   }
 
-  /* ---------- Themes ---------- */
+  /* ---------- Styles ----------
+     Each block changes the visual treatment, not the layout: whether surfaces
+     have borders or shadows, whether inputs are boxed or ruled, whether
+     buttons are solid or ghosted, how table rows separate. */
 
-  [data-theme="terminal"] {
-    --bg: #080a0c;
-    --bg-elevated: #0e1113;
-    --surface: #101416;
-    --surface-hover: #1a2024;
-    --border: #232b30;
-    --border-strong: #35414a;
-    --row-border: rgba(35, 43, 48, 0.8);
-    --thead-bg: #151a1d;
-    --text: #d6e2dc;
-    --text-dim: #8fa398;
-    --text-faint: #5c6b63;
-    --accent: #3ddc84;
-    --accent-dim: #2bb56a;
-    --accent-on: #04120a;
-    --accent-soft: rgba(61, 220, 132, 0.12);
-    --accent-line: rgba(61, 220, 132, 0.4);
-    --accent-ring: rgba(61, 220, 132, 0.18);
-    --env-dev: #c9772a;
-    --good: #3ddc84;
-    --warn: #e8c05a;
-    --warn-text: #e8c05a;
-    --bad: #ff6b60;
-    --bad-text: #ff8f86;
-    --backdrop: rgba(0, 0, 0, 0.8);
-    --shadow: rgba(0, 0, 0, 0.7);
-    --jk: #7fd6a8;
-    --js: #e8c05a;
-    --jn: #6fc3ff;
-    --jb: #d89cff;
-    --ju: #5c6b63;
-    --radius: 3px;
-    --radius-lg: 4px;
-    --font-ui: var(--mono);
-  }
-
-  [data-theme="daylight"] {
-    color-scheme: light;
-    --bg: #ffffff;
-    --bg-elevated: #f6f8fa;
-    --surface: #ffffff;
-    --surface-hover: #eef2f6;
-    --border: #d5dbe3;
-    --border-strong: #b6c0cc;
-    --row-border: rgba(213, 219, 227, 0.85);
-    --thead-bg: #eef2f6;
-    --text: #1c2531;
-    --text-dim: #566173;
-    --text-faint: #8492a5;
-    --accent: #1f6feb;
-    --accent-dim: #1a5fd0;
+  /* Flat — no borders anywhere; blocks of solid colour and zebra rows. */
+  [data-theme="flat"] {
+    --bg: #12151c;
+    --bg-elevated: #1b2029;
+    --surface: #1b2029;
+    --surface-hover: #262d39;
+    --border: #1b2029;
+    --border-strong: #38404f;
+    --row-border: transparent;
+    --thead-bg: #262d39;
+    --text: #e8ecf3;
+    --text-dim: #a2acbd;
+    --text-faint: #717d90;
+    --accent: #5b8def;
+    --accent-dim: #3d6fd4;
     --accent-on: #ffffff;
-    --accent-soft: rgba(31, 111, 235, 0.09);
-    --accent-line: rgba(31, 111, 235, 0.32);
-    --accent-ring: rgba(31, 111, 235, 0.16);
-    --env-dev: #b4690e;
-    --good: #16794a;
-    --warn: #9a6700;
-    --warn-text: #7a5200;
-    --bad: #c1352b;
-    --bad-text: #a52a22;
-    --backdrop: rgba(28, 37, 49, 0.4);
-    --shadow: rgba(28, 37, 49, 0.16);
-    --jk: #0a58a8;
-    --js: #a13b12;
-    --jn: #116329;
-    --jb: #7d2cc4;
-    --ju: #7c8a9d;
-    --radius: 8px;
-    --radius-lg: 10px;
-  }
-
-  [data-theme="industrial"] {
-    --bg: #17181a;
-    --bg-elevated: #1f2124;
-    --surface: #212427;
-    --surface-hover: #2d3135;
-    --border: #3a3f45;
-    --border-strong: #545b63;
-    --row-border: rgba(58, 63, 69, 0.9);
-    --thead-bg: #2a2e32;
-    --text: #f2f4f6;
-    --text-dim: #b6bcc4;
-    --text-faint: #8a929b;
-    --accent: #ff9f1c;
-    --accent-dim: #e2860a;
-    --accent-on: #1a1200;
-    --accent-soft: rgba(255, 159, 28, 0.14);
-    --accent-line: rgba(255, 159, 28, 0.45);
-    --accent-ring: rgba(255, 159, 28, 0.22);
-    --env-dev: #2f81f7;
-    --good: #5ada8b;
-    --warn: #ffc457;
-    --warn-text: #ffd07a;
-    --bad: #ff6f61;
-    --bad-text: #ff9086;
-    --backdrop: rgba(10, 11, 12, 0.78);
-    --shadow: rgba(0, 0, 0, 0.6);
-    --jk: #ffc457;
-    --js: #a8d8a0;
-    --jn: #7cc7ff;
-    --jb: #d9a8ff;
-    --ju: #8a929b;
-    --radius: 5px;
+    --accent-soft: rgba(91, 141, 239, 0.14);
+    --accent-line: rgba(91, 141, 239, 0.4);
+    --accent-ring: rgba(91, 141, 239, 0.25);
+    --env-dev: #c07818;
+    --good: #43c98a;
+    --warn: #e8b64a;
+    --warn-text: #efc76a;
+    --bad: #ef6f66;
+    --bad-text: #f59189;
+    --backdrop: rgba(8, 10, 14, 0.8);
+    --shadow: rgba(0, 0, 0, 0.45);
+    --jk: #7fb4ff;
+    --js: #f0c38a;
+    --jn: #6fd39b;
+    --jb: #c9a3f5;
+    --ju: #717d90;
+    --radius: 4px;
     --radius-lg: 6px;
+
+    --panel-border: 0;
+    --input-bg: #12151c;
+    --input-border: 0;
+    --btn-bg: #262d39;
+    --btn-border: 0;
+    --btn-primary-border: 0;
+    --row-stripe: rgba(255, 255, 255, 0.025);
+    --row-line: 0;
+    --thead-line: 0;
+    --label-spacing: 0.12em;
   }
 
-  [data-theme="slate"] {
-    --bg: #14161a;
-    --bg-elevated: #1a1d22;
-    --surface: #1c2026;
-    --surface-hover: #252a32;
-    --border: #2b3038;
-    --border-strong: #3d444e;
-    --row-border: rgba(43, 48, 56, 0.75);
-    --thead-bg: #1f232a;
-    --text: #dfe3e8;
-    --text-dim: #9aa2ad;
-    --text-faint: #6b7380;
-    --accent: #8b9dc3;
-    --accent-dim: #6f82aa;
-    --accent-on: #0f1115;
-    --accent-soft: rgba(139, 157, 195, 0.12);
-    --accent-line: rgba(139, 157, 195, 0.3);
-    --accent-ring: rgba(139, 157, 195, 0.16);
-    --env-dev: #a8845c;
-    --good: #7fb69a;
-    --warn: #d4b483;
-    --warn-text: #d4b483;
-    --bad: #c98a84;
-    --bad-text: #d49f99;
-    --backdrop: rgba(12, 14, 17, 0.75);
-    --shadow: rgba(0, 0, 0, 0.5);
-    --jk: #9db4d8;
-    --js: #c4b59a;
-    --jn: #8fb8a8;
-    --jb: #b0a0c8;
-    --ju: #6b7380;
-    --radius: 14px;
-    --radius-lg: 18px;
+  /* Elevated — borderless surfaces separated by shadow and lift. */
+  [data-theme="elevated"] {
+    --bg: #0e1116;
+    --bg-elevated: #191d25;
+    --surface: #1c212b;
+    --surface-hover: #262c38;
+    --border: #262c38;
+    --border-strong: #38404f;
+    --row-border: rgba(56, 64, 79, 0.45);
+    --thead-bg: #232935;
+    --text: #e9edf4;
+    --text-dim: #a6b0c0;
+    --text-faint: #75808f;
+    --accent: #7aa2ff;
+    --accent-dim: #3866d2;
+    --accent-on: #ffffff;
+    --accent-soft: rgba(122, 162, 255, 0.13);
+    --accent-line: rgba(122, 162, 255, 0.3);
+    --accent-ring: rgba(122, 162, 255, 0.22);
+    --env-dev: #cc8a2a;
+    --good: #5ed39a;
+    --warn: #f0c26a;
+    --warn-text: #f5d089;
+    --bad: #f5837a;
+    --bad-text: #f7a09a;
+    --backdrop: rgba(6, 8, 11, 0.7);
+    --shadow: rgba(0, 0, 0, 0.55);
+    --jk: #8fc4ff;
+    --js: #f3cb96;
+    --jn: #7fdcae;
+    --jb: #cbadf8;
+    --ju: #75808f;
+    --radius: 12px;
+    --radius-lg: 16px;
+
+    --panel-border: 0;
+    --panel-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --panel-pad: 22px;
+    --input-border: 0;
+    --btn-border: 0;
+    --btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --btn-primary-border: 0;
+    --btn-primary-shadow: 0 2px 10px rgba(77, 122, 232, 0.4);
+    --thead-line: 0;
   }
+
+  /* Outline — hairlines only; transparent fills, ruled inputs, ghost buttons. */
+  [data-theme="outline"] {
+    --bg: #0c0e12;
+    --bg-elevated: transparent;
+    --surface: transparent;
+    --surface-hover: rgba(255, 255, 255, 0.04);
+    --border: #2f3640;
+    --border-strong: #454f5c;
+    --row-border: rgba(47, 54, 64, 0.7);
+    --thead-bg: transparent;
+    --text: #dfe4ea;
+    --text-dim: #99a3b0;
+    --text-faint: #6b7583;
+    --accent: #9ee7d2;
+    --accent-dim: #6fcfb6;
+    --accent-on: #06201a;
+    --accent-soft: rgba(158, 231, 210, 0.1);
+    --accent-line: rgba(158, 231, 210, 0.35);
+    --accent-ring: rgba(158, 231, 210, 0.18);
+    --env-dev: #d4a05c;
+    --good: #7fdcb8;
+    --warn: #ddc07a;
+    --warn-text: #ddc07a;
+    --bad: #e89089;
+    --bad-text: #e89089;
+    --backdrop: rgba(6, 7, 9, 0.82);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --jk: #9ee7d2;
+    --js: #ddc07a;
+    --jn: #8fc8e8;
+    --jb: #c3aee0;
+    --ju: #6b7583;
+    --radius: 0px;
+    --radius-lg: 0px;
+
+    --panel-bg: transparent;
+    --panel-border: 1px solid var(--border);
+    --input-bg: transparent;
+    --input-border: 0 0 1px 0;
+    --input-radius: 0;
+    --btn-bg: transparent;
+    --btn-border: 1px solid var(--border);
+    --btn-primary-bg: transparent;
+    --btn-primary-fg: var(--accent);
+    --btn-primary-border: 1px solid var(--accent);
+    --label-spacing: 0.16em;
+    --label-size: 0.68rem;
+    --label-weight: 600;
+  }
+
+  /* Paper — light and print-like: warm ground, serif headings, ruled lines. */
+  [data-theme="paper"] {
+    color-scheme: light;
+    --bg: #faf8f4;
+    --bg-elevated: #ffffff;
+    --surface: #ffffff;
+    --surface-hover: #f2efe8;
+    --border: #ddd6ca;
+    --border-strong: #bdb3a2;
+    --row-border: rgba(221, 214, 202, 0.9);
+    --thead-bg: #f2efe8;
+    --text: #2b2722;
+    --text-dim: #625b51;
+    --text-faint: #8c8377;
+    --accent: #8a5a2b;
+    --accent-dim: #74491f;
+    --accent-on: #fffdf9;
+    --accent-soft: rgba(138, 90, 43, 0.08);
+    --accent-line: rgba(138, 90, 43, 0.3);
+    --accent-ring: rgba(138, 90, 43, 0.18);
+    --env-dev: #1f6feb;
+    --good: #2f6b46;
+    --warn: #8a6516;
+    --warn-text: #6d4f11;
+    --bad: #a83b30;
+    --bad-text: #8c3127;
+    --backdrop: rgba(43, 39, 34, 0.35);
+    --shadow: rgba(43, 39, 34, 0.14);
+    --jk: #7a4a1c;
+    --js: #2f5f3a;
+    --jn: #1f4f7a;
+    --jb: #6b3a7a;
+    --ju: #8c8377;
+    --radius: 2px;
+    --radius-lg: 2px;
+
+    --panel-bg: var(--surface);
+    --panel-border: 1px solid var(--border);
+    --panel-pad: 24px;
+    --input-bg: transparent;
+    --input-border: 0 0 1px 0;
+    --input-radius: 0;
+    --btn-bg: transparent;
+    --btn-border: 1px solid var(--border-strong);
+    --btn-primary-bg: var(--accent-dim);
+    --btn-primary-border: 1px solid var(--accent-dim);
+    --row-line: 1px solid var(--row-border);
+    --thead-line: 2px solid var(--text);
+    --label-transform: none;
+    --label-spacing: 0.02em;
+    --label-size: 0.78rem;
+    --label-weight: 600;
+    --h1-font: Georgia, "Times New Roman", "Songti TC", "PMingLiU", serif;
+    --h1-weight: 700;
+    --h1-spacing: 0;
+  }
+
 
   * { box-sizing: border-box; }
 
@@ -220,7 +313,7 @@
     margin-bottom: 22px;
   }
   .brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .brand h1 { margin: 0; font-size: 1.25rem; font-weight: 650; letter-spacing: -0.01em; }
+  .brand h1 { margin: 0; font-size: 1.25rem; font-family: var(--h1-font); font-weight: var(--h1-weight); letter-spacing: var(--h1-spacing); }
   .brand .byline {
     font-size: 0.84rem;
     font-weight: 700;
@@ -270,10 +363,13 @@
 
   /* ---------- Query panel ---------- */
   .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    border: var(--panel-border);
+    border-style: solid;
+    border-color: var(--border);
     border-radius: var(--radius-lg);
-    padding: 18px;
+    box-shadow: var(--panel-shadow);
+    padding: var(--panel-pad);
   }
   .field-row {
     display: grid;
@@ -283,19 +379,19 @@
   }
   label.lbl {
     display: block;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-spacing);
+    text-transform: var(--label-transform);
     color: var(--text-faint);
     margin-bottom: 6px;
   }
   select, textarea, input[type="search"], input[type="number"] {
     width: 100%;
-    background: var(--bg-elevated);
+    background: var(--input-bg);
     color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: var(--input-border) solid var(--border);
+    border-radius: var(--input-radius);
     padding: 9px 11px;
     font: inherit;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -509,8 +605,9 @@
     font: inherit;
     font-weight: 600;
     border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
+    border: var(--btn-border) solid var(--border);
+    background: var(--btn-bg);
+    box-shadow: var(--btn-shadow);
     color: var(--text);
     padding: 8px 14px;
     cursor: pointer;
@@ -520,9 +617,10 @@
   button.btn:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--border-strong); }
   button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
   button.btn.primary {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--accent-on);
+    background: var(--btn-primary-bg);
+    border: var(--btn-primary-border) solid var(--accent);
+    color: var(--btn-primary-fg);
+    box-shadow: var(--btn-primary-shadow);
     padding: 9px 22px;
   }
   button.btn.primary:hover:not(:disabled) { background: var(--accent); }
@@ -618,7 +716,7 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     padding: 9px 12px;
-    border-bottom: 1px solid var(--border-strong);
+    border-bottom: var(--thead-line);
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
@@ -627,7 +725,7 @@
   thead th .arrow { opacity: 0.45; margin-left: 4px; font-size: 0.85em; }
   tbody td {
     padding: 8px 12px;
-    border-bottom: 1px solid var(--row-border);
+    border-bottom: var(--row-line);
     max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -636,6 +734,7 @@
     font-size: 0.8rem;
   }
   tbody tr { cursor: pointer; }
+  tbody tr:nth-child(even) td { background: var(--row-stripe); }
   tbody tr:hover td { background: var(--surface-hover); }
   tbody tr:last-child td { border-bottom: 0; }
   .null { color: var(--text-faint); font-style: italic; opacity: 0.75; }
@@ -799,11 +898,11 @@
     </div>
     <div class="header-right">
       <select id="theme" aria-label="介面風格">
-        <option value="midnight">🌙 Midnight</option>
-        <option value="terminal">🖥 Terminal</option>
-        <option value="daylight">☀ Daylight</option>
-        <option value="industrial">🔶 Industrial</option>
-        <option value="slate">🪨 Slate</option>
+        <option value="midnight">Midnight　深色框線</option>
+        <option value="flat">Flat　無框純色</option>
+        <option value="elevated">Elevated　陰影浮起</option>
+        <option value="outline">Outline　細線稿</option>
+        <option value="paper">Paper　紙本淺色</option>
       </select>
       <div class="seg" role="group" aria-label="Environment">
         <button type="button" data-env="prd" aria-pressed="true">PRD</button>
