@@ -1,0 +1,10 @@
+{
+  "name": "cdp-cerberus-query",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static query UI for the Wiwynn CDP Cerberus sn_info API, with a serverless CORS proxy.",
+  "engines": {
+    "node": ">=18"
+  }
+}

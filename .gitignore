@@ -1,0 +1,17 @@
+# Vercel
+.vercel/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python (legacy Streamlit app)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/

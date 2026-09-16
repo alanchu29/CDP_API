@@ -1,0 +1,11 @@
+# Only index.html and api/ need to ship. Everything below is repo-only.
+
+# Legacy Streamlit app
+query_api.py
+requirements.txt
+.devcontainer/
+
+# Development aids
+scripts/
+docs/
+*.md
